@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub下载加速</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        
+        :root {
+            --google-blue: #1a73e8;
+            --google-blue-light: #e8f0fe;
+            --google-gray: #5f6368;
+            --google-gray-light: #f8f9fa;
+            --shadow: 0 1px 3px rgba(60, 64, 67, 0.3), 0 4px 8px rgba(60, 64, 67, 0.15);
+            --shadow-light: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px rgba(60, 64, 67, 0.15);
+        }
+        
+        body {
+            background-color: var(--google-gray-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            background-image: linear-gradient(to bottom, #f8f9fa, #e8f0fe);
+            background-attachment: fixed;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            color: var(--google-blue);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--google-gray);
+            font-weight: 400;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .input-container {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        
+        .input-field:focus {
+            border-color: var(--google-blue);
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+        
+        .input-label {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: var(--google-gray);
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            background-color: white;
+            padding: 0 5px;
+        }
+        
+        .input-field:focus + .input-label,
+        .input-field:not(:placeholder-shown) + .input-label {
+            top: -10px;
+            left: 10px;
+            font-size: 13px;
+            color: var(--google-blue);
+        }
+        
+        .error-message {
+            color: #d93025;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+        
+        .convert-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--google-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .convert-btn:hover {
+            background-color: #1669d6;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .convert-btn:disabled {
+            background-color: #dadce0;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .result-container {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s ease;
+        }
+        
+        .result-container.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .result-title {
+            font-size: 1.4rem;
+            color: var(--google-gray);
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .link-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--google-gray-light);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow-light);
+            transition: all 0.2s ease;
+        }
+        
+        .link-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(60, 64, 67, 0.2);
+        }
+        
+        .provider-tag {
+            background-color: var(--google-blue);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .link-content {
+            flex: 1;
+            margin: 0 15px;
+            font-size: 14px;
+            word-break: break-all;
+            color: var(--google-gray);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background-color: white;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+        
+        .action-btn:hover {
+            background-color: var(--google-blue-light);
+            border-color: var(--google-blue);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: var(--google-gray);
+            font-size: 14px;
+        }
+        
+        .creator {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--google-gray);
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #323232;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .card {
+                padding: 25px;
+            }
+            
+            .link-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .provider-tag {
+                margin-bottom: 10px;
+            }
+            
+            .link-content {
+                margin: 10px 0;
+                width: 100%;
+            }
+            
+            .action-buttons {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>GitHub下载加速</h1>
+            <p class="subtitle">快速获取GitHub资源的加速下载链接</p>
+        </header>
+        
+        <div class="card">
+            <div class="input-container">
+                <input type="text" id="github-link" class="input-field" placeholder=" " autocomplete="off">
+                <label for="github-link" class="input-label">在此键入GitHub资源下载链接</label>
+                <div class="error-message" id="error-msg">请输入正确的GitHub链接</div>
+            </div>
+            
+            <button id="convert-btn" class="convert-btn" disabled>
+                <i class="fas fa-link"></i>
+                转换链接
+            </button>
+        </div>
+        
+        <div class="result-container" id="result-container">
+            <h2 class="result-title">加速链接已生成</h2>
+            
+            <div class="link-item">
+                <div class="provider-tag">Cloudflare</div>
+                <div class="link-content" id="link1">https://gh-proxy.com/</div>
+                <div class="action-buttons">
+                    <button class="action-btn copy-btn" data-clipboard-target="#link1">
+                        <i class="far fa-copy"></i>
+                        复制
+                    </button>
+                    <button class="action-btn open-btn" data-link-target="#link1">
+                        <i class="fas fa-external-link-alt"></i>
+                        打开
+                    </button>
+                </div>
+            </div>
+            
+            <div class="link-item">
+                <div class="provider-tag">Hongkong</div>
+                <div class="link-content" id="link2">https://hk.gh-proxy.com/</div>
+                <div class="action-buttons">
+                    <button class="action-btn copy-btn" data-clipboard-target="#link2">
+                        <i class="far fa-copy"></i>
+                        复制
+                    </button>
+                    <button class="action-btn open-btn" data-link-target="#link2">
+                        <i class="fas fa-external-link-alt"></i>
+                        打开
+                    </button>
+                </div>
+            </div>
+            
+            <div class="link-item">
+                <div class="provider-tag">FastlyCDN</div>
+                <div class="link-content" id="link3">https://cdn.gh-proxy.com/</div>
+                <div class="action-buttons">
+                    <button class="action-btn copy-btn" data-clipboard-target="#link3">
+                        <i class="far fa-copy"></i>
+                        复制
+                    </button>
+                    <button class="action-btn open-btn" data-link-target="#link3">
+                        <i class="fas fa-external-link-alt"></i>
+                        打开
+                    </button>
+                </div>
+            </div>
+            
+            <div class="link-item">
+                <div class="provider-tag">Edgeone</div>
+                <div class="link-content" id="link4">https://edgeone.gh-proxy.com/</div>
+                <div class="action-buttons">
+                    <button class="action-btn copy-btn" data-clipboard-target="#link4">
+                        <i class="far fa-copy"></i>
+                        复制
+                    </button>
+                    <button class="action-btn open-btn" data-link-target="#link4">
+                        <i class="fas fa-external-link-alt"></i>
+                        打开
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>感谢 gh-proxy.com</p>
+            <p class="creator">制作人: Lrx</p>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">已复制到剪贴板</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const githubLinkInput = document.getElementById('github-link');
+            const convertBtn = document.getElementById('convert-btn');
+            const errorMsg = document.getElementById('error-msg');
+            const resultContainer = document.getElementById('result-container');
+            const link1 = document.getElementById('link1');
+            const link2 = document.getElementById('link2');
+            const link3 = document.getElementById('link3');
+            const link4 = document.getElementById('link4');
+            const toast = document.getElementById('toast');
+            
+            // 验证GitHub链接
+            function validateGithubLink(link) {
+                return link.includes('github.com');
+            }
+            
+            // 显示提示消息
+            function showToast(message) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
+            }
+            
+            // 输入框事件监听
+            githubLinkInput.addEventListener('input', function() {
+                const isValid = validateGithubLink(this.value);
+                
+                if (this.value === '') {
+                    convertBtn.disabled = true;
+                    errorMsg.style.display = 'none';
+                } else if (!isValid) {
+                    convertBtn.disabled = true;
+                    errorMsg.style.display = 'block';
+                } else {
+                    convertBtn.disabled = false;
+                    errorMsg.style.display = 'none';
+                }
+            });
+            
+            // 转换按钮点击事件
+            convertBtn.addEventListener('click', function() {
+                const githubLink = githubLinkInput.value;
+                
+                // 生成加速链接
+                link1.textContent = `https://gh-proxy.com/${githubLink}`;
+                link2.textContent = `https://hk.gh-proxy.com/${githubLink}`;
+                link3.textContent = `https://cdn.gh-proxy.com/${githubLink}`;
+                link4.textContent = `https://edgeone.gh-proxy.com/${githubLink}`;
+                
+                // 显示结果区域
+                resultContainer.classList.add('show');
+                
+                // 滚动到结果区域
+                resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+            
+            // 复制按钮功能
+            document.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-clipboard-target');
+                    const textToCopy = document.querySelector(targetId).textContent;
+                    
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        // 显示复制成功提示
+                        showToast('已复制到剪贴板');
+                    }).catch(err => {
+                        // 降级方案：使用execCommand
+                        const textArea = document.createElement('textarea');
+                        textArea.value = textToCopy;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        
+                        // 显示复制成功提示
+                        showToast('已复制到剪贴板');
+                    });
+                });
+            });
+            
+            // 打开按钮功能
+            document.querySelectorAll('.open-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-link-target');
+                    const link = document.querySelector(targetId).textContent;
+                    window.open(link, '_blank');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
