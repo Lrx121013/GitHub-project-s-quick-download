@@ -27,15 +27,109 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
             padding: 40px 20px;
             background-image: linear-gradient(to bottom, #f8f9fa, #e8f0fe);
             background-attachment: fixed;
         }
         
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #202124;
+            color: white;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .navbar-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .github-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            color: white;
+        }
+        
+        .navbar-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+        
+        .menu-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: var(--google-gray);
+            text-decoration: none;
+            transition: background-color 0.2s;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .dropdown-item:hover {
+            background-color: var(--google-blue-light);
+            color: var(--google-blue);
+        }
+        
+        .dropdown-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
         .container {
             width: 100%;
             max-width: 800px;
+            margin: 80px auto 0;
         }
         
         header {
@@ -113,6 +207,40 @@
             display: none;
         }
         
+        .download-type-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .download-type-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px;
+            background-color: white;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .download-type-btn.active {
+            background-color: var(--google-blue-light);
+            border-color: var(--google-blue);
+            color: var(--google-blue);
+        }
+        
+        .download-type-btn:hover:not(.active) {
+            background-color: #f1f3f4;
+        }
+        
         .convert-btn {
             width: 100%;
             padding: 12px;
@@ -161,6 +289,16 @@
             font-weight: 500;
         }
         
+        .download-type-indicator {
+            display: inline-block;
+            background-color: var(--google-blue);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
         .link-item {
             display: flex;
             align-items: center;
@@ -194,6 +332,7 @@
             font-size: 14px;
             word-break: break-all;
             color: var(--google-gray);
+            font-family: 'Courier New', monospace;
         }
         
         .action-buttons {
@@ -257,6 +396,10 @@
                 padding: 25px;
             }
             
+            .download-type-container {
+                flex-direction: column;
+            }
+            
             .link-item {
                 flex-direction: column;
                 align-items: flex-start;
@@ -275,10 +418,38 @@
                 width: 100%;
                 justify-content: flex-end;
             }
+            
+            .dropdown-menu {
+                right: 10px;
+                width: 180px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <i class="fab fa-github github-icon"></i>
+            <span class="navbar-title">GitHub下载加速</span>
+        </div>
+        <div class="navbar-right">
+            <button class="menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="dropdown-menu" id="dropdown-menu">
+                <a href="https://ghqdl.lrx.dpdns.org" class="dropdown-item">
+                    <i class="fas fa-home"></i>
+                    首页
+                </a>
+                <a href="https://wst.lrx.dpdns.org" class="dropdown-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    网络测速
+                </a>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
         <header>
             <h1>GitHub下载加速</h1>
@@ -292,6 +463,21 @@
                 <div class="error-message" id="error-msg">请输入正确的GitHub链接</div>
             </div>
             
+            <div class="download-type-container">
+                <button class="download-type-btn active" data-type="original">
+                    <i class="fas fa-download"></i>
+                    原始链接加速下载
+                </button>
+                <button class="download-type-btn" data-type="git">
+                    <i class="fab fa-git-alt"></i>
+                    Git Clone下载
+                </button>
+                <button class="download-type-btn" data-type="wget">
+                    <i class="fas fa-terminal"></i>
+                    wget/cURL下载
+                </button>
+            </div>
+            
             <button id="convert-btn" class="convert-btn" disabled>
                 <i class="fas fa-link"></i>
                 转换链接
@@ -299,7 +485,10 @@
         </div>
         
         <div class="result-container" id="result-container">
-            <h2 class="result-title">加速链接已生成</h2>
+            <h2 class="result-title">
+                加速链接已生成
+                <span class="download-type-indicator" id="download-type-indicator">原始链接</span>
+            </h2>
             
             <div class="link-item">
                 <div class="provider-tag">Cloudflare</div>
@@ -339,10 +528,6 @@
                         <i class="far fa-copy"></i>
                         复制
                     </button>
-                    <button class="action-btn open-btn" data-link-target="#link3">
-                        <i class="fas fa-external-link-alt"></i>
-                        打开
-                    </button>
                 </div>
             </div>
             
@@ -353,10 +538,6 @@
                     <button class="action-btn copy-btn" data-clipboard-target="#link4">
                         <i class="far fa-copy"></i>
                         复制
-                    </button>
-                    <button class="action-btn open-btn" data-link-target="#link4">
-                        <i class="fas fa-external-link-alt"></i>
-                        打开
                     </button>
                 </div>
             </div>
@@ -376,11 +557,28 @@
             const convertBtn = document.getElementById('convert-btn');
             const errorMsg = document.getElementById('error-msg');
             const resultContainer = document.getElementById('result-container');
+            const downloadTypeIndicator = document.getElementById('download-type-indicator');
             const link1 = document.getElementById('link1');
             const link2 = document.getElementById('link2');
             const link3 = document.getElementById('link3');
             const link4 = document.getElementById('link4');
             const toast = document.getElementById('toast');
+            const menuToggle = document.getElementById('menu-toggle');
+            const dropdownMenu = document.getElementById('dropdown-menu');
+            
+            let currentDownloadType = 'original';
+            let originalGithubLink = '';
+            
+            // 导航菜单切换
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('active');
+            });
+            
+            // 点击页面其他地方关闭菜单
+            document.addEventListener('click', function() {
+                dropdownMenu.classList.remove('active');
+            });
             
             // 验证GitHub链接
             function validateGithubLink(link) {
@@ -395,6 +593,81 @@
                     toast.classList.remove('show');
                 }, 2000);
             }
+            
+            // 格式化链接根据下载类型
+            function formatLink(link, downloadType) {
+                if (downloadType === 'original') {
+                    return link;
+                } else if (downloadType === 'git') {
+                    return `git clone ${link}`;
+                } else if (downloadType === 'wget') {
+                    return `wget "${link}"`;
+                }
+                return link;
+            }
+            
+            // 更新下载类型指示器
+            function updateDownloadTypeIndicator() {
+                const typeNames = {
+                    'original': '原始链接',
+                    'git': 'Git Clone',
+                    'wget': 'wget/cURL'
+                };
+                downloadTypeIndicator.textContent = typeNames[currentDownloadType];
+            }
+            
+            // 更新链接显示
+            function updateLinksDisplay() {
+                if (!originalGithubLink) return;
+                
+                const baseUrls = [
+                    'https://gh-proxy.com/',
+                    'https://hk.gh-proxy.com/',
+                    'https://cdn.gh-proxy.com/',
+                    'https://edgeone.gh-proxy.com/'
+                ];
+                
+                const links = [link1, link2, link3, link4];
+                
+                baseUrls.forEach((baseUrl, index) => {
+                    const fullUrl = baseUrl + originalGithubLink;
+                    links[index].textContent = formatLink(fullUrl, currentDownloadType);
+                });
+                
+                // 根据下载类型显示/隐藏打开按钮
+                const openButtons = document.querySelectorAll('.open-btn');
+                if (currentDownloadType === 'original') {
+                    openButtons.forEach(btn => {
+                        btn.style.display = 'flex';
+                    });
+                } else {
+                    openButtons.forEach(btn => {
+                        btn.style.display = 'none';
+                    });
+                }
+            }
+            
+            // 下载类型按钮事件监听
+            document.querySelectorAll('.download-type-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    document.querySelectorAll('.download-type-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // 为当前按钮添加active类
+                    this.classList.add('active');
+                    
+                    // 更新当前下载类型
+                    currentDownloadType = this.getAttribute('data-type');
+                    
+                    // 更新下载类型指示器
+                    updateDownloadTypeIndicator();
+                    
+                    // 更新链接显示
+                    updateLinksDisplay();
+                });
+            });
             
             // 输入框事件监听
             githubLinkInput.addEventListener('input', function() {
@@ -414,13 +687,10 @@
             
             // 转换按钮点击事件
             convertBtn.addEventListener('click', function() {
-                const githubLink = githubLinkInput.value;
+                originalGithubLink = githubLinkInput.value;
                 
-                // 生成加速链接
-                link1.textContent = `https://gh-proxy.com/${githubLink}`;
-                link2.textContent = `https://hk.gh-proxy.com/${githubLink}`;
-                link3.textContent = `https://cdn.gh-proxy.com/${githubLink}`;
-                link4.textContent = `https://edgeone.gh-proxy.com/${githubLink}`;
+                // 更新链接显示
+                updateLinksDisplay();
                 
                 // 显示结果区域
                 resultContainer.classList.add('show');
@@ -457,7 +727,18 @@
             document.querySelectorAll('.open-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const targetId = this.getAttribute('data-link-target');
-                    const link = document.querySelector(targetId).textContent;
+                    const linkText = document.querySelector(targetId).textContent;
+                    
+                    // 根据下载类型处理打开操作
+                    let link = linkText;
+                    if (currentDownloadType === 'git') {
+                        // 提取git clone后面的URL
+                        link = linkText.replace('git clone ', '');
+                    } else if (currentDownloadType === 'wget') {
+                        // 提取wget后面的URL（去掉引号）
+                        link = linkText.replace('wget "', '').replace('"', '');
+                    }
+                    
                     window.open(link, '_blank');
                 });
             });
