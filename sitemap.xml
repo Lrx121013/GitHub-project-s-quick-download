@@ -7,9 +7,15 @@
 >
 
 <url>
- <loc>https://ghqdl.lrx.dpdns.org</loc>
- <priority>0.3</priority>
- <lastmod>2025-10-18</lastmod>
+ <loc>https://ghqdl.lrx.dpdns.org/</loc>
+ <priority>1.0</priority>
+ <lastmod>2025-10-19</lastmod>
+ <changefreq>daily</changefreq>
+</url>
+<url>
+ <loc>https://wst.lrx.dpdns.org/</loc>
+ <priority>0.8</priority>
+ <lastmod>2025-10-19</lastmod>
  <changefreq>weekly</changefreq>
 </url>
 
