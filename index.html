@@ -3,425 +3,486 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub下载加速</title>
+    <title>GitHub下载加速器 - 快速稳定的GitHub资源下载服务</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Roboto', Arial, sans-serif;
         }
-        
-        :root {
-            --google-blue: #1a73e8;
-            --google-blue-light: #e8f0fe;
-            --google-gray: #5f6368;
-            --google-gray-light: #f8f9fa;
-            --shadow: 0 1px 3px rgba(60, 64, 67, 0.3), 0 4px 8px rgba(60, 64, 67, 0.15);
-            --shadow-light: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px rgba(60, 64, 67, 0.15);
-        }
-        
+
         body {
-            background-color: var(--google-gray-light);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 40px 20px;
-            background-image: linear-gradient(to bottom, #f8f9fa, #e8f0fe);
-            background-attachment: fixed;
+            position: relative;
+            overflow-x: hidden;
         }
-        
-        /* 导航栏样式 */
-        .navbar {
-            background-color: #202124;
-            color: white;
-            padding: 0 20px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+
+        /* Google登录界面背景效果 */
+        body::before {
+            content: '';
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            z-index: -1;
         }
-        
-        .navbar-left {
+
+        /* 导航栏 */
+        .navbar {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
+            justify-content: space-between;
             align-items: center;
         }
-        
-        .github-icon {
-            font-size: 24px;
-            margin-right: 15px;
+
+        .logo {
             color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
-        .navbar-title {
-            font-size: 18px;
-            font-weight: 500;
-        }
-        
+
         .menu-toggle {
             background: none;
             border: none;
             color: white;
-            font-size: 20px;
+            font-size: 24px;
             cursor: pointer;
-            padding: 10px;
-            border-radius: 50%;
-            transition: background-color 0.3s;
+            transition: transform 0.3s ease;
         }
-        
+
         .menu-toggle:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+            transform: scale(1.1);
         }
-        
+
         .dropdown-menu {
             position: absolute;
-            top: 100%;
-            right: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            width: 200px;
+            top: 70px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 200px;
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
             transition: all 0.3s ease;
-            z-index: 1001;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
-        
+
         .dropdown-menu.active {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
-        
+
         .dropdown-item {
+            color: white;
+            text-decoration: none;
             display: flex;
             align-items: center;
+            gap: 10px;
             padding: 12px 16px;
-            color: var(--google-gray);
-            text-decoration: none;
-            transition: background-color 0.2s;
-            border-bottom: 1px solid #f1f3f4;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+            margin-bottom: 8px;
         }
-        
-        .dropdown-item:last-child {
-            border-bottom: none;
-        }
-        
+
         .dropdown-item:hover {
-            background-color: var(--google-blue-light);
-            color: var(--google-blue);
+            background: rgba(255, 255, 255, 0.1);
         }
-        
-        .dropdown-item i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-        
+
+        /* 主容器 */
         .container {
-            width: 100%;
-            max-width: 800px;
-            margin: 80px auto 0;
+            max-width: 900px;
+            margin: 120px auto 50px;
+            padding: 0 20px;
         }
-        
-        header {
+
+        /* 标题区域 */
+        .header-section {
             text-align: center;
             margin-bottom: 50px;
-            color: var(--google-blue);
+            animation: fadeInDown 0.8s ease;
         }
-        
-        h1 {
-            font-size: 2.8rem;
-            font-weight: 500;
-            margin-bottom: 10px;
-            letter-spacing: -0.5px;
+
+        .main-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            letter-spacing: -1px;
         }
-        
+
         .subtitle {
-            font-size: 1.2rem;
-            color: var(--google-gray);
-            font-weight: 400;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
         }
-        
-        .card {
-            background-color: white;
-            border-radius: 8px;
+
+        /* 主要内容卡片 */
+        .main-card {
+            background: white;
+            border-radius: 20px;
             padding: 40px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
             margin-bottom: 30px;
-            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease;
+            transition: transform 0.3s ease;
         }
-        
-        .input-container {
+
+        .main-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Google风格的输入框 */
+        .input-group {
             position: relative;
             margin-bottom: 25px;
         }
-        
-        .input-field {
+
+        .google-input {
             width: 100%;
-            padding: 15px;
-            border: 1px solid #dadce0;
-            border-radius: 4px;
+            padding: 16px 16px 16px 16px;
             font-size: 16px;
+            border: 2px solid #dadce0;
+            border-radius: 8px;
             outline: none;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            background: white;
         }
-        
-        .input-field:focus {
-            border-color: var(--google-blue);
-            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+
+        .google-input:focus {
+            border-color: #4285f4;
+            box-shadow: 0 1px 6px rgba(66, 133, 244, 0.3);
         }
-        
-        .input-label {
+
+        .floating-label {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            color: var(--google-gray);
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #5f6368;
             font-size: 16px;
             pointer-events: none;
-            transition: all 0.2s ease;
-            background-color: white;
-            padding: 0 5px;
+            transition: all 0.3s ease;
+            background: white;
+            padding: 0 4px;
         }
-        
-        .input-field:focus + .input-label,
-        .input-field:not(:placeholder-shown) + .input-label {
-            top: -10px;
-            left: 10px;
-            font-size: 13px;
-            color: var(--google-blue);
+
+        .google-input:focus ~ .floating-label,
+        .google-input:not(:placeholder-shown) ~ .floating-label {
+            top: 0;
+            font-size: 12px;
+            color: #4285f4;
         }
-        
+
         .error-message {
-            color: #d93025;
+            color: #ea4335;
             font-size: 14px;
             margin-top: 8px;
             display: none;
+            animation: shake 0.5s ease;
         }
-        
-        .download-type-container {
+
+        /* 转换模式选择 */
+        .mode-selector {
             display: flex;
             gap: 15px;
             margin-bottom: 25px;
             flex-wrap: wrap;
         }
-        
-        .download-type-btn {
+
+        .mode-btn {
             flex: 1;
             min-width: 150px;
-            padding: 12px;
-            background-color: white;
-            border: 1px solid #dadce0;
-            border-radius: 4px;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             font-size: 14px;
             font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            color: #333;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
         }
-        
-        .download-type-btn.active {
-            background-color: var(--google-blue-light);
-            border-color: var(--google-blue);
-            color: var(--google-blue);
+
+        .mode-btn:hover {
+            border-color: #4285f4;
+            background: #f8f9fa;
         }
-        
-        .download-type-btn:hover:not(.active) {
-            background-color: #f1f3f4;
+
+        .mode-btn.active {
+            background: #4285f4;
+            color: white;
+            border-color: #4285f4;
+            transform: scale(1.05);
         }
-        
+
+        /* 转换按钮 */
         .convert-btn {
             width: 100%;
-            padding: 12px;
-            background-color: var(--google-blue);
+            padding: 16px;
+            background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
         }
-        
-        .convert-btn:hover {
-            background-color: #1669d6;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-        
-        .convert-btn:disabled {
-            background-color: #dadce0;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        
-        .result-container {
-            display: none;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.4s ease;
-        }
-        
-        .result-container.show {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .result-title {
-            font-size: 1.4rem;
-            color: var(--google-gray);
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-        
-        .download-type-indicator {
-            display: inline-block;
-            background-color: var(--google-blue);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 14px;
-            margin-left: 10px;
-        }
-        
-        .link-item {
-            display: flex;
-            align-items: center;
-            background-color: var(--google-gray-light);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: var(--shadow-light);
-            transition: all 0.2s ease;
-        }
-        
-        .link-item:hover {
+
+        .convert-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(60, 64, 67, 0.2);
+            box-shadow: 0 10px 25px rgba(66, 133, 244, 0.3);
         }
-        
-        .provider-tag {
-            background-color: var(--google-blue);
-            color: white;
+
+        .convert-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* 结果区域 */
+        .results-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .provider-badge {
+            display: inline-block;
             padding: 6px 12px;
             border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            min-width: 120px;
-            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
-        .link-content {
-            flex: 1;
-            margin: 0 15px;
-            font-size: 14px;
+
+        .badge-cloudflare { background: #f38020; color: white; }
+        .badge-hongkong { background: #ff6b6b; color: white; }
+        .badge-fastly { background: #00bcf2; color: white; }
+        .badge-edgeone { background: #1890ff; color: white; }
+
+        .result-link {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
             word-break: break-all;
-            color: var(--google-gray);
             font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #333;
+            border: 1px solid #e0e0e0;
         }
-        
+
         .action-buttons {
             display: flex;
             gap: 10px;
         }
-        
+
         .action-btn {
-            background-color: white;
-            border: 1px solid #dadce0;
-            border-radius: 4px;
-            padding: 8px 12px;
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 5px;
-            font-size: 14px;
+            justify-content: center;
+            gap: 6px;
         }
-        
-        .action-btn:hover {
-            background-color: var(--google-blue-light);
-            border-color: var(--google-blue);
+
+        .copy-btn {
+            background: #4285f4;
+            color: white;
         }
-        
+
+        .copy-btn:hover {
+            background: #357ae8;
+            transform: translateY(-2px);
+        }
+
+        .open-btn {
+            background: #34a853;
+            color: white;
+        }
+
+        .open-btn:hover {
+            background: #2d8f47;
+            transform: translateY(-2px);
+        }
+
+        /* 页脚 */
         .footer {
             text-align: center;
-            margin-top: 40px;
-            color: var(--google-gray);
-            font-size: 14px;
+            padding: 40px 20px;
+            color: white;
+            animation: fadeIn 1s ease;
         }
-        
-        .creator {
-            margin-top: 10px;
-            font-size: 14px;
-            color: var(--google-gray);
+
+        .footer-text {
+            font-size: 16px;
+            margin-bottom: 10px;
+            opacity: 0.9;
         }
-        
+
+        .author {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        /* 复制成功提示 */
         .toast {
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #323232;
+            top: 100px;
+            right: 20px;
+            background: #34a853;
             color: white;
-            padding: 12px 24px;
-            border-radius: 4px;
-            font-size: 14px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            animation: slideInRight 0.3s ease;
+            z-index: 2000;
         }
-        
+
         .toast.show {
-            opacity: 1;
+            display: block;
         }
-        
-        @media (max-width: 600px) {
-            .card {
+
+        /* 动画 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 32px;
+            }
+            
+            .main-card, .results-section {
                 padding: 25px;
             }
             
-            .download-type-container {
+            .mode-selector {
                 flex-direction: column;
             }
             
-            .link-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .provider-tag {
-                margin-bottom: 10px;
-            }
-            
-            .link-content {
-                margin: 10px 0;
+            .mode-btn {
                 width: 100%;
-            }
-            
-            .action-buttons {
-                width: 100%;
-                justify-content: flex-end;
-            }
-            
-            .dropdown-menu {
-                right: 10px;
-                width: 180px;
             }
         }
     </style>
@@ -429,15 +490,15 @@
 <body>
     <!-- 导航栏 -->
     <nav class="navbar">
-        <div class="navbar-left">
-            <i class="fab fa-github github-icon"></i>
-            <span class="navbar-title">GitHub下载加速</span>
-        </div>
-        <div class="navbar-right">
-            <button class="menu-toggle" id="menu-toggle">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fab fa-github"></i>
+                GitHub下载加速器
+            </a>
+            <button class="menu-toggle" onclick="toggleMenu()">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="dropdown-menu" id="dropdown-menu">
+            <div class="dropdown-menu" id="dropdownMenu">
                 <a href="https://ghqdl.lrx.dpdns.org" class="dropdown-item">
                     <i class="fas fa-home"></i>
                     首页
@@ -450,306 +511,216 @@
         </div>
     </nav>
 
+    <!-- 主容器 -->
     <div class="container">
-        <header>
-            <h1>GitHub下载加速</h1>
-            <p class="subtitle">快速获取GitHub资源的加速下载链接</p>
-        </header>
-        
-        <div class="card">
-            <div class="input-container">
-                <input type="text" id="github-link" class="input-field" placeholder=" " autocomplete="off">
-                <label for="github-link" class="input-label">在此键入GitHub资源下载链接</label>
-                <div class="error-message" id="error-msg">请输入正确的GitHub链接</div>
+        <!-- 标题区域 -->
+        <div class="header-section">
+            <h1 class="main-title">GitHub下载加速器</h1>
+            <p class="subtitle">快速、稳定、安全的GitHub资源下载服务</p>
+        </div>
+
+        <!-- 主要内容卡片 -->
+        <div class="main-card">
+            <!-- 输入框组 -->
+            <div class="input-group">
+                <input type="text" 
+                       class="google-input" 
+                       id="githubUrl" 
+                       placeholder=" "
+                       oninput="validateInput()">
+                <label class="floating-label">在此键入github资源下载链接</label>
+                <div class="error-message" id="errorMessage">请输入正确的链接</div>
             </div>
-            
-            <div class="download-type-container">
-                <button class="download-type-btn active" data-type="original">
+
+            <!-- 模式选择 -->
+            <div class="mode-selector">
+                <button class="mode-btn active" onclick="selectMode('direct')" data-mode="direct">
                     <i class="fas fa-download"></i>
-                    原始链接加速下载
+                    原链接加速下载
                 </button>
-                <button class="download-type-btn" data-type="git">
+                <button class="mode-btn" onclick="selectMode('git')" data-mode="git">
                     <i class="fab fa-git-alt"></i>
                     Git Clone下载
                 </button>
-                <button class="download-type-btn" data-type="wget">
+                <button class="mode-btn" onclick="selectMode('curl')" data-mode="curl">
                     <i class="fas fa-terminal"></i>
                     wget/cURL下载
                 </button>
             </div>
-            
-            <button id="convert-btn" class="convert-btn" disabled>
-                <i class="fas fa-link"></i>
-                转换链接
+
+            <!-- 转换按钮 -->
+            <button class="convert-btn" id="convertBtn" onclick="convertLinks()" disabled>
+                <span>转换链接</span>
+                <span>🔗</span>
             </button>
         </div>
-        
-        <div class="result-container" id="result-container">
-            <h2 class="result-title">
-                加速链接已生成
-                <span class="download-type-indicator" id="download-type-indicator">原始链接</span>
-            </h2>
-            
-            <div class="link-item">
-                <div class="provider-tag">Cloudflare</div>
-                <div class="link-content" id="link1">https://gh-proxy.com/</div>
-                <div class="action-buttons">
-                    <button class="action-btn copy-btn" data-clipboard-target="#link1">
-                        <i class="far fa-copy"></i>
-                        复制
-                    </button>
-                    <button class="action-btn open-btn" data-link-target="#link1">
-                        <i class="fas fa-external-link-alt"></i>
-                        打开
-                    </button>
-                </div>
-            </div>
-            
-            <div class="link-item">
-                <div class="provider-tag">Hongkong</div>
-                <div class="link-content" id="link2">https://hk.gh-proxy.com/</div>
-                <div class="action-buttons">
-                    <button class="action-btn copy-btn" data-clipboard-target="#link2">
-                        <i class="far fa-copy"></i>
-                        复制
-                    </button>
-                    <button class="action-btn open-btn" data-link-target="#link2">
-                        <i class="fas fa-external-link-alt"></i>
-                        打开
-                    </button>
-                </div>
-            </div>
-            
-            <div class="link-item">
-                <div class="provider-tag">FastlyCDN</div>
-                <div class="link-content" id="link3">https://cdn.gh-proxy.com/</div>
-                <div class="action-buttons">
-                    <button class="action-btn copy-btn" data-clipboard-target="#link3">
-                        <i class="far fa-copy"></i>
-                        复制
-                    </button>
-                    <button class="action-btn open-btn" data-link-target="#link3">
-                        <i class="fas fa-external-link-alt"></i>
-                        打开
-                    </button>
-                </div>
-            </div>
-            
-            <div class="link-item">
-                <div class="provider-tag">Edgeone</div>
-                <div class="link-content" id="link4">https://edgeone.gh-proxy.com/</div>
-                <div class="action-buttons">
-                    <button class="action-btn copy-btn" data-clipboard-target="#link4">
-                        <i class="far fa-copy"></i>
-                        复制
-                    </button>
-                    <button class="action-btn open-btn" data-link-target="#link4">
-                        <i class="fas fa-external-link-alt"></i>
-                        打开
-                    </button>
-                </div>
-            </div>
+
+        <!-- 结果区域 -->
+        <div class="results-section" id="resultsSection">
+            <div id="resultsContainer"></div>
         </div>
-        
+
+        <!-- 页脚 -->
         <div class="footer">
-            <p>感谢 gh-proxy.com</p>
-            <p class="creator">制作人: Lrx</p>
+            <p class="footer-text">感谢 gh-proxy.com 提供技术支持</p>
+            <p class="author">制作人：Lrx</p>
         </div>
     </div>
 
-    <div class="toast" id="toast">已复制到剪贴板</div>
+    <!-- 复制成功提示 -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i> 已复制到剪贴板
+    </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const githubLinkInput = document.getElementById('github-link');
-            const convertBtn = document.getElementById('convert-btn');
-            const errorMsg = document.getElementById('error-msg');
-            const resultContainer = document.getElementById('result-container');
-            const downloadTypeIndicator = document.getElementById('download-type-indicator');
-            const link1 = document.getElementById('link1');
-            const link2 = document.getElementById('link2');
-            const link3 = document.getElementById('link3');
-            const link4 = document.getElementById('link4');
+        let currentMode = 'direct';
+        
+        // 切换菜单
+        function toggleMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        // 选择模式
+        function selectMode(mode) {
+            currentMode = mode;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+            
+            // 如果已有结果，重新生成
+            if (document.getElementById('resultsSection').classList.contains('show')) {
+                convertLinks();
+            }
+        }
+
+        // 验证输入
+        function validateInput() {
+            const input = document.getElementById('githubUrl');
+            const errorMsg = document.getElementById('errorMessage');
+            const convertBtn = document.getElementById('convertBtn');
+            
+            if (input.value.trim() === '') {
+                errorMsg.style.display = 'none';
+                convertBtn.disabled = true;
+                return;
+            }
+            
+            if (!input.value.includes('github.com')) {
+                errorMsg.style.display = 'block';
+                convertBtn.disabled = true;
+            } else {
+                errorMsg.style.display = 'none';
+                convertBtn.disabled = false;
+            }
+        }
+
+        // 转换链接
+        function convertLinks() {
+            const input = document.getElementById('githubUrl').value.trim();
+            if (!input || !input.includes('github.com')) return;
+            
+            const proxies = [
+                { name: 'Cloudflare', url: 'https://gh-proxy.com/', badge: 'badge-cloudflare' },
+                { name: 'Hongkong', url: 'https://hk.gh-proxy.com/', badge: 'badge-hongkong' },
+                { name: 'FastlyCDN', url: 'https://cdn.gh-proxy.com/', badge: 'badge-fastly' },
+                { name: 'Edgeone', url: 'https://edgeone.gh-proxy.com/', badge: 'badge-edgeone' }
+            ];
+            
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = '';
+            
+            proxies.forEach((proxy, index) => {
+                let finalUrl = proxy.url + input;
+                
+                // 根据模式处理链接
+                if (currentMode === 'git') {
+                    finalUrl = `git clone "${finalUrl}"`;
+                } else if (currentMode === 'curl') {
+                    finalUrl = `wget "${finalUrl}"`;
+                }
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.style.animationDelay = `${index * 0.1}s`;
+                
+                resultItem.innerHTML = `
+                    <div class="provider-badge ${proxy.badge}">${proxy.name}</div>
+                    <div class="result-link">${finalUrl}</div>
+                    <div class="action-buttons">
+                        <button class="action-btn copy-btn" onclick="copyToClipboard('${finalUrl.replace(/'/g, "\\'")}')">
+                            <i class="fas fa-copy"></i>
+                            复制
+                        </button>
+                        <button class="action-btn open-btn" onclick="openLink('${proxy.url}${input}')">
+                            <i class="fas fa-external-link-alt"></i>
+                            打开
+                        </button>
+                    </div>
+                `;
+                
+                resultsContainer.appendChild(resultItem);
+            });
+            
+            // 显示结果区域
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.classList.add('show');
+            
+            // 平滑滚动到结果区域
+            setTimeout(() => {
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        // 复制到剪贴板
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast();
+            } catch (err) {
+                // 降级方案
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast();
+            }
+        }
+
+        // 显示提示
+        function showToast() {
             const toast = document.getElementById('toast');
-            const menuToggle = document.getElementById('menu-toggle');
-            const dropdownMenu = document.getElementById('dropdown-menu');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 打开链接
+        function openLink(url) {
+            window.open(url, '_blank');
+        }
+
+        // 点击外部关闭菜单
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const menuToggle = document.querySelector('.menu-toggle');
             
-            let currentDownloadType = 'original';
-            let originalGithubLink = '';
-            
-            // 导航菜单切换
-            menuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                dropdownMenu.classList.toggle('active');
-            });
-            
-            // 点击页面其他地方关闭菜单
-            document.addEventListener('click', function() {
-                dropdownMenu.classList.remove('active');
-            });
-            
-            // 验证GitHub链接
-            function validateGithubLink(link) {
-                return link.includes('github.com');
+            if (!menu.contains(event.target) && !menuToggle.contains(event.target)) {
+                menu.classList.remove('active');
             }
-            
-            // 显示提示消息
-            function showToast(message) {
-                toast.textContent = message;
-                toast.classList.add('show');
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 2000);
+        });
+
+        // 回车键触发转换
+        document.getElementById('githubUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('convertBtn').disabled) {
+                convertLinks();
             }
-            
-            // 格式化链接根据下载类型
-            function formatLink(link, downloadType) {
-                if (downloadType === 'original') {
-                    return link;
-                } else if (downloadType === 'git') {
-                    return `git clone ${link}`;
-                } else if (downloadType === 'wget') {
-                    return `wget "${link}"`;
-                }
-                return link;
-            }
-            
-            // 更新下载类型指示器
-            function updateDownloadTypeIndicator() {
-                const typeNames = {
-                    'original': '原始链接',
-                    'git': 'Git Clone',
-                    'wget': 'wget/cURL'
-                };
-                downloadTypeIndicator.textContent = typeNames[currentDownloadType];
-            }
-            
-            // 更新链接显示
-            function updateLinksDisplay() {
-                if (!originalGithubLink) return;
-                
-                const baseUrls = [
-                    'https://gh-proxy.com/',
-                    'https://hk.gh-proxy.com/',
-                    'https://cdn.gh-proxy.com/',
-                    'https://edgeone.gh-proxy.com/'
-                ];
-                
-                const links = [link1, link2, link3, link4];
-                
-                baseUrls.forEach((baseUrl, index) => {
-                    const fullUrl = baseUrl + originalGithubLink;
-                    links[index].textContent = formatLink(fullUrl, currentDownloadType);
-                });
-                
-                // 根据下载类型显示/隐藏打开按钮
-                const openButtons = document.querySelectorAll('.open-btn');
-                if (currentDownloadType === 'original') {
-                    openButtons.forEach(btn => {
-                        btn.style.display = 'flex';
-                    });
-                } else {
-                    openButtons.forEach(btn => {
-                        btn.style.display = 'none';
-                    });
-                }
-            }
-            
-            // 下载类型按钮事件监听
-            document.querySelectorAll('.download-type-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    // 移除所有按钮的active类
-                    document.querySelectorAll('.download-type-btn').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    
-                    // 为当前按钮添加active类
-                    this.classList.add('active');
-                    
-                    // 更新当前下载类型
-                    currentDownloadType = this.getAttribute('data-type');
-                    
-                    // 更新下载类型指示器
-                    updateDownloadTypeIndicator();
-                    
-                    // 更新链接显示
-                    updateLinksDisplay();
-                });
-            });
-            
-            // 输入框事件监听
-            githubLinkInput.addEventListener('input', function() {
-                const isValid = validateGithubLink(this.value);
-                
-                if (this.value === '') {
-                    convertBtn.disabled = true;
-                    errorMsg.style.display = 'none';
-                } else if (!isValid) {
-                    convertBtn.disabled = true;
-                    errorMsg.style.display = 'block';
-                } else {
-                    convertBtn.disabled = false;
-                    errorMsg.style.display = 'none';
-                }
-            });
-            
-            // 转换按钮点击事件
-            convertBtn.addEventListener('click', function() {
-                originalGithubLink = githubLinkInput.value;
-                
-                // 更新链接显示
-                updateLinksDisplay();
-                
-                // 显示结果区域
-                resultContainer.classList.add('show');
-                
-                // 滚动到结果区域
-                resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-            
-            // 复制按钮功能
-            document.querySelectorAll('.copy-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const targetId = this.getAttribute('data-clipboard-target');
-                    const textToCopy = document.querySelector(targetId).textContent;
-                    
-                    navigator.clipboard.writeText(textToCopy).then(() => {
-                        // 显示复制成功提示
-                        showToast('已复制到剪贴板');
-                    }).catch(err => {
-                        // 降级方案：使用execCommand
-                        const textArea = document.createElement('textarea');
-                        textArea.value = textToCopy;
-                        document.body.appendChild(textArea);
-                        textArea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textArea);
-                        
-                        // 显示复制成功提示
-                        showToast('已复制到剪贴板');
-                    });
-                });
-            });
-            
-            // 打开按钮功能
-            document.querySelectorAll('.open-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const targetId = this.getAttribute('data-link-target');
-                    const linkText = document.querySelector(targetId).textContent;
-                    
-                    // 根据下载类型处理打开操作
-                    let link = linkText;
-                    if (currentDownloadType === 'git') {
-                        // 提取git clone后面的URL
-                        link = linkText.replace('git clone ', '');
-                    } else if (currentDownloadType === 'wget') {
-                        // 提取wget后面的URL（去掉引号）
-                        link = linkText.replace('wget "', '').replace('"', '');
-                    }
-                    
-                    window.open(link, '_blank');
-                });
-            });
         });
     </script>
 </body>
