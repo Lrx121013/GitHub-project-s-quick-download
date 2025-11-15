@@ -244,9 +244,54 @@
         
         .turnstile-container {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             margin: 20px 0;
             min-height: 65px;
+        }
+        
+        .verify-btn {
+            background-color: var(--google-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .verify-btn:hover {
+            background-color: #1669d6;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .verify-btn:disabled {
+            background-color: #dadce0;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .verification-status {
+            font-size: 14px;
+            color: var(--google-gray);
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .verification-success {
+            color: #0f9d58;
+        }
+        
+        .verification-pending {
+            color: #f4b400;
         }
         
         .convert-btn {
@@ -488,7 +533,15 @@
             
             <!-- Cloudflare Turnstile 人机验证 -->
             <div class="turnstile-container">
-                <div class="cf-turnstile" data-sitekey="0x4AAAAAACBAlWxYItf_NX1h" data-callback="onTurnstileSuccess"></div>
+                <button id="verify-btn" class="verify-btn">
+                    <i class="fas fa-shield-alt"></i>
+                    点击进行人机验证
+                </button>
+                <div id="turnstile-widget" style="display: none;"></div>
+                <div id="verification-status" class="verification-status">
+                    <i class="fas fa-clock verification-pending"></i>
+                    <span>等待验证</span>
+                </div>
             </div>
             
             <button id="convert-btn" class="convert-btn" disabled>
@@ -586,22 +639,14 @@
             const toast = document.getElementById('toast');
             const menuToggle = document.getElementById('menu-toggle');
             const dropdownMenu = document.getElementById('dropdown-menu');
+            const verifyBtn = document.getElementById('verify-btn');
+            const turnstileWidget = document.getElementById('turnstile-widget');
+            const verificationStatus = document.getElementById('verification-status');
             
             let currentDownloadType = 'original';
             let originalGithubLink = '';
             let isTurnstileVerified = false;
-            
-            // Turnstile 验证成功回调
-            window.onTurnstileSuccess = function() {
-                isTurnstileVerified = true;
-                updateConvertButtonState();
-            };
-            
-            // 更新转换按钮状态
-            function updateConvertButtonState() {
-                const isValidLink = validateGithubLink(githubLinkInput.value);
-                convertBtn.disabled = !(isValidLink && isTurnstileVerified);
-            }
+            let turnstileWidgetId = null;
             
             // 导航菜单切换
             menuToggle.addEventListener('click', function(e) {
@@ -627,6 +672,68 @@
                     toast.classList.remove('show');
                 }, 2000);
             }
+            
+            // 更新转换按钮状态
+            function updateConvertButtonState() {
+                const isValidLink = validateGithubLink(githubLinkInput.value);
+                convertBtn.disabled = !(isValidLink && isTurnstileVerified);
+            }
+            
+            // 更新验证状态显示
+            function updateVerificationStatus(isVerified) {
+                const statusIcon = verificationStatus.querySelector('i');
+                const statusText = verificationStatus.querySelector('span');
+                
+                if (isVerified) {
+                    statusIcon.className = 'fas fa-check-circle verification-success';
+                    statusText.textContent = '验证成功';
+                    verificationStatus.classList.add('verification-success');
+                } else {
+                    statusIcon.className = 'fas fa-clock verification-pending';
+                    statusText.textContent = '等待验证';
+                    verificationStatus.classList.remove('verification-success');
+                }
+            }
+            
+            // Turnstile 验证成功回调
+            window.onTurnstileSuccess = function(token) {
+                isTurnstileVerified = true;
+                updateConvertButtonState();
+                updateVerificationStatus(true);
+                verifyBtn.style.display = 'none';
+                turnstileWidget.style.display = 'none';
+            };
+            
+            // Turnstile 验证失败回调
+            window.onTurnstileError = function() {
+                isTurnstileVerified = false;
+                updateConvertButtonState();
+                updateVerificationStatus(false);
+                verifyBtn.style.display = 'flex';
+                turnstileWidget.style.display = 'none';
+                alert('验证失败，请重试');
+            };
+            
+            // 验证按钮点击事件
+            verifyBtn.addEventListener('click', function() {
+                // 显示Turnstile小部件
+                turnstileWidget.style.display = 'block';
+                
+                // 渲染Turnstile小部件
+                if (!turnstileWidgetId) {
+                    turnstileWidgetId = turnstile.render('#turnstile-widget', {
+                        sitekey: '0x4AAAAAACBAlWxYItf_NX1h',
+                        callback: onTurnstileSuccess,
+                        'error-callback': onTurnstileError
+                    });
+                }
+                
+                // 隐藏验证按钮
+                verifyBtn.style.display = 'none';
+                
+                // 更新验证状态
+                updateVerificationStatus(false);
+            });
             
             // 格式化链接根据下载类型
             function formatLink(link, downloadType) {
